@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/krolchonok/Documents/Study/Формалки/Формалки/src/autom.h
+iostream
+-
+vector
+-
+unordered_map
+-
+unordered_set
+-
+stack
+-
+queue
+-
+string
+-
+
+/home/krolchonok/Documents/Study/Формалки/Формалки/src/main.cpp
+iostream
+-
+vector
+-
+unordered_map
+-
+unordered_set
+-
+stack
+-
+queue
+-
+string
+-
+autom.h
+/home/krolchonok/Documents/Study/Формалки/Формалки/src/autom.h
+
