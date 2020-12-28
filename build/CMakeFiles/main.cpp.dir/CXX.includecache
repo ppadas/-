@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/krolchonok/Documents/Study/Формалки/Formalki/src/Parser.h
+iostream
+-
+vector
+-
+string
+-
+
+/home/krolchonok/Documents/Study/Формалки/Formalki/src/main.cpp
+Parser.h
+/home/krolchonok/Documents/Study/Формалки/Formalki/src/Parser.h
+string
+-
+
