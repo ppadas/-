@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <set>
 
 struct Rule {
 public:
@@ -23,18 +22,6 @@ public:
     bool operator == (Value& other) {
         return (rule_number == other.rule_number && offset == other.offset && number == other.number);
     }
-    bool operator < (const Value& other) const {
-        if (rule_number < other.rule_number) {
-            return true;
-        }
-        if (rule_number == other.rule_number && offset < other.offset) {
-            return true;
-        }
-        if (rule_number == other.rule_number && offset == other.offset && number < other.number) {
-            return true;
-        }
-        return false;
-    }
 };
 
 class Parser {
@@ -49,10 +36,10 @@ public:
 private:
 
     std::vector<Rule> rules_;
-    void Complete(std::vector<std::set<Value>>& D, int number);
-    void Predict(std::vector<std::set<Value>>& D, int number);
+    bool Complete(std::vector<std::vector<Value>>& D, int number, int new_begin);
+    bool Predict(std::vector<std::vector<Value>>& D, int number, int new_begin);
     bool AddNew(std::vector<Value>& to, std::vector<Value>& from);
-    void Scan(std::vector<std::set<Value>>& D, std::string str, int step);
+    void Scan(std::vector<std::vector<Value>>& D, std::string str, int step);
 };
 
 void Parser::ReadRules() {
@@ -72,7 +59,7 @@ void Parser::ReadRules() {
     }
 }
 
-void Print(int i, std::set<Value>& D) {
+void Print(int i, std::vector<Value>& D) {
     std::cout << i << "\n";
     for (auto a : D) {
         std::cout << a.rule_number << " " << a.offset << " " << a.number << "\n";
@@ -83,18 +70,18 @@ bool Parser::CheckWord(std::string str) {
     if (str == "eps") {
         str = "";
     }
-    std::vector<std::set<Value>> D (str.size() + 1);
-    D[0].emplace(0, 0, 0);
-    int new_values_offset = 0;
-    int old_size = D[0].size();
+    std::vector<std::vector<Value>> D (str.size() + 1);
+    D[0].emplace_back(0, 0, 0);
     for (int i = 0; i <= str.size(); ++i) {
         Scan(D, str, i);
-        old_size = D[i].size();
-        do {
+        int new_begin = 0;
+        int old_size = D[i].size();
+        while(new_begin != old_size) {
+            Complete(D, i, new_begin);
+            Predict(D, i, new_begin);
+            new_begin = old_size;
             old_size = D[i].size();
-            Complete(D, i);
-            Predict(D, i);
-        } while(old_size != D[i].size());
+        }
         //Print(i, D[i]);
     }
     for (auto i : D.back()) {
@@ -105,32 +92,38 @@ bool Parser::CheckWord(std::string str) {
     return false;
 }
 
-void Parser::Complete(std::vector<std::set<Value>>& D, int number) {
+bool Parser::Complete(std::vector<std::vector<Value>>& D, int number, int new_begin) {
     bool flag = false;
-    for (auto value : D[number]) {
+    std::vector<Value> should_add;
+    for (int i = new_begin; i < D[number].size(); ++i) {
+        Value value = D[number][i];
         if (value.offset == rules_[value.rule_number].right.size()) {
             for (auto i_values : D[value.number]) {
                 if (i_values.offset < rules_[i_values.rule_number].right.size() &&
                     rules_[i_values.rule_number].right[i_values.offset] == rules_[value.rule_number].left) {
-                    D[number].emplace(i_values.rule_number, i_values.offset + 1, i_values.number);
+                    should_add.emplace_back(i_values.rule_number, i_values.offset + 1, i_values.number);
                 }
             }
         }
     }
+    return AddNew(D[number], should_add); 
 }
 
-void Parser::Predict(std::vector<std::set<Value>>& D, int number) {
+bool Parser::Predict(std::vector<std::vector<Value>>& D, int number, int new_begin) {
     bool flag = false;
-    for (auto value : D[number]) {
+    std::vector<Value> should_add;
+    for (int i = new_begin; i < D[number].size(); ++i) {
+        Value value = D[number][i];
         if (value.offset < rules_[value.rule_number].right.size() ) {
             char symbol = rules_[value.rule_number].right[value.offset];
             for (int k = 0; k < rules_.size(); ++k) {
                 if (rules_[k].left == symbol) {
-                    D[number].emplace(k, 0, number);
+                    should_add.emplace_back(k, 0, number);
                 }
             }
         }
     }
+    return AddNew(D[number], should_add);
 }
 
 bool Parser::AddNew(std::vector<Value>& to, std::vector<Value>& from) {
@@ -151,14 +144,14 @@ bool Parser::AddNew(std::vector<Value>& to, std::vector<Value>& from) {
     return flag;
 }
 
-void Parser::Scan(std::vector<std::set<Value>>& D, std::string str, int step) {
+void Parser::Scan(std::vector<std::vector<Value>>& D, std::string str, int step) {
     if (step == 0) {
         return;
     }
     for (auto i : D[step - 1]) {
         if (i.offset < rules_[i.rule_number].right.size() && 
             rules_[i.rule_number].right[i.offset] == str[step - 1]) {
-                D[step].emplace(i.rule_number, i.offset + 1, i.number);
+                D[step].emplace_back(i.rule_number, i.offset + 1, i.number);
         }
     }
 }

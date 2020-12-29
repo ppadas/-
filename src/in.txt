@@ -1,4 +1,11 @@
-S aS
-S eps
+0 S
+S cT
+S bS
+T Uc
+T cTa
+U cV
+U bUb
+V cbV
+V c
 1
-aa
+bbbccbccbcbca
