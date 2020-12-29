@@ -1,4 +1,4 @@
-S Sa
+S aS
 S eps
 1
-aaaa
+aa
